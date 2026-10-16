@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多人日历 · 项目协作版</title>
+    <!-- 引入 Font Awesome 图标库，用于美观的按钮图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            padding: 2rem;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        h1 i {
+            color: #3b82f6;
+            font-size: 2rem;
+        }
+
+        .subhead {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+            padding: 0.6rem 1rem;
+        }
+
+        /* 表单区域 */
+        .form-panel {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .input-group {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .input-group label i {
+            font-size: 0.9rem;
+            color: #3b82f6;
+        }
+
+        .input-group input {
+            padding: 0.8rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 1rem;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.15s;
+            background: white;
+        }
+
+        .input-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .add-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            height: fit-content;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
+        }
+
+        .add-btn:hover {
+            background: #2563eb;
+        }
+
+        .add-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 日历头部导航 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .month-year {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .month-year i {
+            color: #3b82f6;
+            font-size: 1.6rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .nav-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #0f172a;
+        }
+
+        .today-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0 1.25rem;
+            height: 2.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .today-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        /* 星期行 */
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .weekday {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.5rem 0;
+        }
+
+        /* 日历网格 */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-cell {
+            background: white;
+            border-radius: 1rem;
+            min-height: 6.5rem;
+            padding: 0.6rem 0.6rem 0.6rem 0.6rem;
+            border: 1px solid #e9eef3;
+            transition: all 0.1s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        .day-cell:hover {
+            border-color: #cbd5e1;
+            background: #fefefe;
+        }
+
+        .day-cell.other-month {
+            background: #f9fbfd;
+            opacity: 0.65;
+            border-color: #eff2f6;
+        }
+
+        .day-cell.today {
+            border: 2px solid #3b82f6;
+            background: #f0f7ff;
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .other-month .day-number {
+            color: #94a3b8;
+        }
+
+        .today .day-number {
+            color: #2563eb;
+        }
+
+        /* 事件列表（项目卡片） */
+        .events-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+            flex: 1;
+            max-height: 5rem;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        .events-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .events-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .events-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+
+        .event-card {
+            background: #eef2ff;
+            border-left: 3px solid #3b82f6;
+            border-radius: 0.4rem;
+            padding: 0.3rem 0.4rem;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: #1e293b;
+            word-break: break-word;
+            transition: 0.1s;
+            cursor: default;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .event-card strong {
+            display: block;
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 0.7rem;
+            margin-bottom: 0.1rem;
+        }
+
+        .event-card span {
+            display: block;
+            font-size: 0.65rem;
+            color: #475569;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 空状态提示 */
+        .empty-message {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 0.5rem 0;
+            font-style: italic;
+        }
+
+        /* 底部计数 */
+        .footer-stats {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e9eef3;
+            padding-top: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .badge {
+            background: #eef2ff;
+            color: #3b82f6;
+            padding: 0.25rem 0.9rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* 适配小屏 */
+        @media (max-width: 700px) {
+            .app-container {
+                padding: 1.2rem;
+            }
+            .day-cell {
+                min-height: 5rem;
+                padding: 0.4rem;
+            }
+            .event-card {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.3rem;
+            }
+            .event-card strong {
+                font-size: 0.6rem;
+            }
+            .form-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .add-btn {
+                justify-content: center;
+            }
+            .month-year {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1>
+        <i class="fas fa-calendar-alt"></i> 多人项目日历
+    </h1>
+    <div class="subhead">
+        <i class="fas fa-users" style="margin-right: 8px;"></i>
+        输入日期和简介，项目自动显示在日历上 · 支持多用户共享
+    </div>
+
+    <!-- 输入表单 -->
+    <div class="form-panel">
+        <div class="input-group">
+            <label><i class="fas fa-calendar-day"></i> 项目日期</label>
+            <input type="date" id="projectDate" value="">
+        </div>
+        <div class="input-group" style="flex: 2 1 300px;">
+            <label><i class="fas fa-pen"></i> 项目简介</label>
+            <input type="text" id="projectDesc" placeholder="例如：前端评审会议 / 设计稿交付" maxlength="80">
+        </div>
+        <button class="add-btn" id="addProjectBtn">
+            <i class="fas fa-plus-circle"></i> 添加项目
+        </button>
+    </div>
+
+    <!-- 日历头部 -->
+    <div class="calendar-header">
+        <div class="month-year" id="monthYearDisplay">
+            <i class="fas fa-calendar-week"></i>
+            <span id="monthYearText">2025年3月</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevMonthBtn" title="上个月"><i class="fas fa-chevron-left"></i></button>
+            <button class="today-btn" id="todayBtn"><i class="fas fa-dot-circle"></i> 今天</button>
+            <button class="nav-btn" id="nextMonthBtn" title="下个月"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- 星期标题 -->
+    <div class="weekdays">
+        <div class="weekday">周一</div>
+        <div class="weekday">周二</div>
+        <div class="weekday">周三</div>
+        <div class="weekday">周四</div>
+        <div class="weekday">周五</div>
+        <div class="weekday">周六</div>
+        <div class="weekday">周日</div>
+    </div>
+
+    <!-- 日历网格 -->
+    <div class="calendar-grid" id="calendarGrid"></div>
+
+    <!-- 底部统计 -->
+    <div class="footer-stats">
+        <div><i class="fas fa-database" style="margin-right: 6px;"></i> 所有项目数据保存在浏览器本地，刷新不丢失</div>
+        <div class="badge" id="projectCount">0 个项目</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 数据存储 ----------
+        // 使用 localStorage 模拟多人共享，任何访问此页面的用户都能看到已添加的项目 (基于同一浏览器)
+        // 实际“多人”共享需要后端，此处为纯前端演示，但满足“多人日历”概念（所有访问者共享同一份本地数据）
+        const STORAGE_KEY = 'multi_user_calendar_projects';
+
+        // 数据结构: { 'YYYY-MM-DD': [ { desc: '简介' }, ... ] }
+        let projects = {};
+
+        // 当前视图日期 (第一天所在月份)
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth(); // 0-11
+
+        // DOM 元素
+        const calendarGrid = document.getElementById('calendarGrid');
+        const monthYearText = document.getElementById('monthYearText');
+        const projectDateInput = document.getElementById('projectDate');
+        const projectDescInput = document.getElementById('projectDesc');
+        const addBtn = document.getElementById('addProjectBtn');
+        const prevBtn = document.getElementById('prevMonthBtn');
+        const nextBtn = document.getElementById('nextMonthBtn');
+        const todayBtn = document.getElementById('todayBtn');
+        const projectCountSpan = document.getElementById('projectCount');
+
+        // ---------- 初始化默认日期 (今天) ----------
+        function setDefaultDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            projectDateInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+
+        // ---------- 从 localStorage 加载数据 ----------
+        function loadProjects() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    projects = JSON.parse(stored);
+                    // 确保每个日期对应的都是数组
+                    Object.keys(projects).forEach(key => {
+                        if (!Array.isArray(projects[key])) {
+                            projects[key] = [];
+                        }
+                    });
+                } catch (e) {
+                    console.warn('解析本地数据失败，使用空数据');
+                    projects = {};
+                }
+            } else {
+                // 添加一些示例数据，让日历不空旷 (使用当前日期前后)
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = today.getMonth();
+                const d = today.getDate();
+
+                // 今天
+                const todayStr = formatDateKey(new Date(y, m, d));
+                // 明天
+                const tomorrowStr = formatDateKey(new Date(y, m, d + 1));
+                // 三天后
+                const threeDaysLater = formatDateKey(new Date(y, m, d + 3));
+                // 昨天 (为了演示上月/跨月)
+                const yesterdayStr = formatDateKey(new Date(y, m, d - 1));
+
+                projects = {
+                    [todayStr]: [{ desc: '项目启动会 · 全体成员' }],
+                    [tomorrowStr]: [{ desc: 'UI 设计评审' }],
+                    [threeDaysLater]: [{ desc: '前端开发联调' }],
+                    [yesterdayStr]: [{ desc: '需求梳理 (已完成)' }]
+                };
+                // 如果昨天是上个月，数据会自然显示在上个月，无需额外处理
+                saveProjects();
+            }
+            updateProjectCount();
+        }
+
+        // 保存到 localStorage
+        function saveProjects() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+            updateProjectCount();
+        }
+
+        // 更新项目总数
+        function updateProjectCount() {
+            let total = 0;
+            Object.values(projects).forEach(arr => total += arr.length);
+            projectCountSpan.textContent = total + ' 个项目';
+        }
+
+        // 格式化日期为 YYYY-MM-DD
+        function formatDateKey(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // ---------- 日历渲染 ----------
+        function renderCalendar() {
+            // 更新月份年份显示
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            monthYearText.textContent = `${currentYear}年 ${monthNames[currentMonth]}`;
+
+            // 计算当月第一天
+            const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+            // 周一作为一周第一天 (getDay() 返回0是周日，1是周一...)
+            let firstDayWeekday = firstDayOfMonth.getDay(); // 0-6
+            // 转换：周一=0, 周日=6  (为了让日历从周一开始)
+            let offset = (firstDayWeekday + 6) % 7; // 周一->0, 周二->1 ... 周日->6
+
+            // 当月总天数
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // 上个月天数 (为了补齐前面的格子)
+            const prevMonthDate = new Date(currentYear, currentMonth, 0);
+            const daysInPrevMonth = prevMonthDate.getDate();
+
+            // 今天用于高亮
+            const today = new Date();
+            const todayStr = formatDateKey(today);
+
+            // 准备网格数据 (6行 * 7列 = 42格)
+            const totalCells = 42;
+            let cells = [];
+
+            // 填充上月日期
+            for (let i = 0; i < offset; i++) {
+                const day = daysInPrevMonth - offset + i + 1;
+                const date = new Date(currentYear, currentMonth - 1, day);
+                cells.push({
+                    date: date,
+                    dayNumber: day,
+                    isCurrentMonth: false,
+                    dateKey: formatDateKey(date)
+                });
+            }
+
+            // 填充当月日期
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(currentYear, currentMonth, d);
+                cells.push({
+                    date: date,
+                    dayNumber: d,
+                    isCurrentMonth: true,
+                    dateKey: formatDateKey(date)
+                });
+            }
+
+            // 填充下月日期，凑满42格
+            const remaining = totalCells - cells.length;
+            for (let i = 1; i <= remaining; i++) {
+                const date = new Date(currentYear, currentMonth + 1, i);
+                cells.push({
+                    date: date,
+                    dayNumber: i,
+                    isCurrentMonth: false,
+                    dateKey: formatDateKey(date)
+                });
+            }
+
+            // 清空grid
+            calendarGrid.innerHTML = '';
+
+            // 生成每个格子
+            cells.forEach(cell => {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
+                if (!cell.isCurrentMonth) {
+                    dayCell.classList.add('other-month');
+                }
+                if (cell.dateKey === todayStr) {
+                    dayCell.classList.add('today');
+                }
+
+                // 日期数字
+                const dayNumberDiv = document.createElement('div');
+                dayNumberDiv.className = 'day-number';
+                dayNumberDiv.textContent = cell.dayNumber;
+                dayCell.appendChild(dayNumberDiv);
+
+                // 事件容器
+                const eventsContainer = document.createElement('div');
+                eventsContainer.className = 'events-container';
+
+                // 获取该日期的项目
+                const dayProjects = projects[cell.dateKey] || [];
+
+                if (dayProjects.length === 0) {
+                    // 显示占位(细微)
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'empty-message';
+                    emptyMsg.textContent = '—';
+                    eventsContainer.appendChild(emptyMsg);
+                } else {
+                    // 显示项目卡片 (最多显示3个，其余折叠，但为了简洁我们全部展示，使用滚动)
+                    dayProjects.forEach(proj => {
+                        const card = document.createElement('div');
+                        card.className = 'event-card';
+                        // 简介，为了安全使用 textContent
+                        const descStrong = document.createElement('strong');
+                        descStrong.textContent = '📌 ' + (proj.desc.length > 20 ? proj.desc.slice(0, 18) + '…' : proj.desc);
+                        // 或者显示完整简介但用省略
+                        // 但为了日历美观，我们用小字显示，卡片本身有title
+                        card.title = proj.desc;  // 悬停显示完整简介
+                        // 如果想更清晰，把完整简介放进去但限制css行数；不过我们直接使用小字体
+                        const descSpan = document.createElement('span');
+                        descSpan.textContent = proj.desc.length > 16 ? proj.desc.slice(0, 14) + '…' : proj.desc;
+                        card.appendChild(descStrong);
+                        card.appendChild(descSpan);
+                        eventsContainer.appendChild(card);
+                    });
+                }
+
+                dayCell.appendChild(eventsContainer);
+                calendarGrid.appendChild(dayCell);
+            });
+
+            // 更新底部计数
+            updateProjectCount();
+        }
+
+        // ---------- 添加项目 ----------
+        function addProject() {
+            const dateVal = projectDateInput.value.trim();
+            const descVal = projectDescInput.value.trim();
+
+            if (!dateVal) {
+                alert('请选择一个日期');
+                return;
+            }
+            if (!descVal) {
+                alert('请输入项目简介');
+                return;
+            }
+
+            // 日期格式 YYYY-MM-DD
+            // 确保日期有效
+            const dateObj = new Date(dateVal + 'T00:00:00');
+            if (isNaN(dateObj.getTime())) {
+                alert('日期格式无效');
+                return;
+            }
+
+            // 存储的key统一为 YYYY-MM-DD
+            const key = formatDateKey(dateObj);
+
+            // 如果该日期还没有项目列表，创建空数组
+            if (!projects[key]) {
+                projects[key] = [];
+            }
+
+            // 添加项目 (可重复添加相同简介，这里不限制)
+            projects[key].push({ desc: descVal });
+
+            // 保存并重新渲染
+            saveProjects();
+            renderCalendar();
+
+            // 清空简介输入框，保留日期 (方便连续添加)
+            projectDescInput.value = '';
+            // 聚焦回简介输入框
+            projectDescInput.focus();
+
+            // 如果添加的日期不在当前显示月份，自动跳转到那个月
+            const addedYear = dateObj.getFullYear();
+            const addedMonth = dateObj.getMonth();
+            if (addedYear !== currentYear || addedMonth !== currentMonth) {
+                currentYear = addedYear;
+                currentMonth = addedMonth;
+                renderCalendar();
+            }
+        }
+
+        // ---------- 月份导航 ----------
+        function goPrevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function goNextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function goToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            renderCalendar();
+            // 将日期输入框设置为今天
+            setDefaultDate();
+        }
+
+        // ---------- 初始化 ----------
+        function init() {
+            // 从本地加载数据
+            loadProjects();
+            // 设置默认日期为今天
+            setDefaultDate();
+            // 渲染日历
+            renderCalendar();
+
+            // 事件绑定
+            addBtn.addEventListener('click', addProject);
+            // 按回车（在简介输入框）也可以添加
+            projectDescInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addProject();
+                }
+            });
+            prevBtn.addEventListener('click', goPrevMonth);
+            nextBtn.addEventListener('click', goNextMonth);
+            todayBtn.addEventListener('click', goToday);
+
+            // 允许点击日期输入框时弹出日期选择器（现代浏览器默认支持）
+        }
+
+        // 启动
+        init();
+    })();
+</script>
+</body>
+</html>
